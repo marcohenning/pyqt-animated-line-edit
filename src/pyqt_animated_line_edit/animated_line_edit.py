@@ -11,22 +11,29 @@ class AnimatedLineEdit(QLineEdit):
         self.placeholderText = placeholderText
         self.fontInner = QFont('Times', 11)
         self.fontOuter = QFont('Times', 9)
-        self.setContentsMargins(0, 5, 0, 0)
+        self.fontMetricsInner = QFontMetrics(self.fontInner)
+        self.fontMetricsOuter = QFontMetrics(self.fontOuter)
+        self.textInner = self.fontMetricsInner.boundingRect(self.placeholderText)
+        self.textOuter = self.fontMetricsOuter.boundingRect(self.placeholderText)
+        self.topOffset = int((self.textOuter.height() - 1) / 2)
+        self.setContentsMargins(0, self.topOffset, 0, 0)
+        self.positionInner = QPoint(10, self.height() - int((self.height() - self.textInner.height()) / 2))
+        self.positionOuter = QPoint(10, int(self.textOuter.height() - self.topOffset / 2))
 
     def paintEvent(self, event):
         super().paintEvent(event)
         painter = QPainter(self)
-        painter.setPen(QColor(100, 100, 100))
 
         if not self.hasFocus():
             painter.setFont(self.fontInner)
-            painter.drawText(10, 25, self.placeholderText)
+            painter.setPen(QColor(100, 100, 100))
+            painter.drawText(self.positionInner, self.placeholderText)
         else:
             painter.setFont(self.fontOuter)
             painter.setPen(QColor(255, 255, 255))
-            painter.drawLine(5, 5, 75, 5)
+            painter.drawLine(QPoint(5, self.topOffset), QPoint(self.textOuter.width() + 15, self.topOffset))
             painter.setPen(QColor(100, 100, 100))
-            painter.drawText(10, 5, self.placeholderText)
+            painter.drawText(self.positionOuter, self.placeholderText)
 
     def focusInEvent(self, event):
         super().focusInEvent(event)
