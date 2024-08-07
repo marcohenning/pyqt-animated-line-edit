@@ -24,7 +24,7 @@ class AnimatedLineEdit(QLineEdit):
         super().paintEvent(event)
         painter = QPainter(self)
 
-        if not self.hasFocus():
+        if not self.hasFocus() and not self.text():
             painter.setFont(self.fontInner)
             painter.setPen(QColor(100, 100, 100))
             painter.drawText(self.positionInner, self.placeholderText)
