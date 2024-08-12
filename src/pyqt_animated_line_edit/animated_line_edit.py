@@ -11,12 +11,14 @@ class AnimatedLineEdit(QLineEdit):
         self.placeholderText = placeholderText
         self.color = QColor(0, 0, 0)
         self.placeholderColor = QColor(100, 100, 100)
+        self.placeholderColorOutside = None
+        self.placeholderColorCurrent = self.placeholderColor
         self.backgroundColor = QColor(255, 255, 255)
         self.borderColor = QColor(0, 0, 0)
         self.borderWidth = 1
         self.borderRadius = 0
-        self.fontInner = QFont('Times', 11)
-        self.fontOuter = QFont('Times', 9)
+        self.fontInner = self.font()
+        self.fontOuter = self.font()
         self.fontCurrent = QFont(self.fontInner.family(), self.fontInner.pointSize())
         self.fontMetricsInner = QFontMetrics(self.fontInner)
         self.fontMetricsOuter = QFontMetrics(self.fontOuter)
@@ -71,12 +73,14 @@ class AnimatedLineEdit(QLineEdit):
         self.positionCurrent.setY(int(self.positionCurrent.y() + (self.positionOuter.y() - self.positionCurrent.y()) * value))
         if value > 0.2 and self.isPlaceholderInside:
             self.isPlaceholderInside = False
+            self.placeholderColorCurrent = self.placeholderColorOutside if self.placeholderColorOutside is not None else self.placeholderColor
         self.update()
 
     def timelinePositionInValueChanged(self, value):
         self.positionCurrent.setY(int(self.positionCurrent.y() + (self.positionInner.y() - self.positionCurrent.y()) * value))
         if value > 0.2 and not self.isPlaceholderInside:
             self.isPlaceholderInside = True
+            self.placeholderColorCurrent = self.placeholderColor
         self.update()
 
     def timelineFontOutValueChanged(self, value):
@@ -98,7 +102,7 @@ class AnimatedLineEdit(QLineEdit):
                 painter.drawLine(QPoint(self.placeholderTextStart - 5, self.topOffset + i),
                                  QPoint(self.placeholderTextStart + self.textOuter.width() + 5, self.topOffset + i))
 
-        painter.setPen(self.placeholderColor)
+        painter.setPen(self.placeholderColorCurrent)
         painter.drawText(self.positionCurrent, self.placeholderText)
 
     def focusInEvent(self, event):
@@ -181,6 +185,12 @@ class AnimatedLineEdit(QLineEdit):
     def setPlaceholderColor(self, color):
         self.placeholderColor = color
 
+    def getPlaceholderColorOutside(self):
+        return self.placeholderColorOutside
+
+    def setPlaceholderColorOutside(self, color):
+        self.placeholderColorOutside = color
+
     def getBackgroundColor(self):
         return self.backgroundColor
 
@@ -219,13 +229,32 @@ class AnimatedLineEdit(QLineEdit):
         self.fontInner.setFamily(family)
         self.fontOuter.setFamily(family)
         self.fontCurrent = QFont(self.fontInner.family(), self.fontInner.pointSize())
+        self.fontCurrent.setWeight(self.fontInner.weight())
+        self.fontCurrent.setItalic(self.fontInner.italic())
 
     def setFontSizeInner(self, size):
         self.fontInner.setPointSize(size)
         self.fontCurrent = QFont(self.fontInner.family(), self.fontInner.pointSize())
+        self.fontCurrent.setWeight(self.fontInner.weight())
+        self.fontCurrent.setItalic(self.fontInner.italic())
 
     def setFontSizeOuter(self, size):
         self.fontOuter.setPointSize(size)
+
+    def setPlaceholderFontBold(self, enable):
+        if enable:
+            self.fontInner.setWeight(QFont.Weight.Bold)
+            self.fontOuter.setWeight(QFont.Weight.Bold)
+            self.fontCurrent.setWeight(QFont.Weight.Bold)
+        else:
+            self.fontInner.setWeight(QFont.Weight.Normal)
+            self.fontOuter.setWeight(QFont.Weight.Normal)
+            self.fontCurrent.setWeight(QFont.Weight.Normal)
+
+    def setPlaceholderFontItalic(self, enable):
+        self.fontInner.setItalic(enable)
+        self.fontOuter.setItalic(enable)
+        self.fontCurrent.setItalic(enable)
 
     def getPadding(self):
         return self.padding
