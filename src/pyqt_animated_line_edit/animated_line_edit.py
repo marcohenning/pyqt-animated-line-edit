@@ -1,3 +1,4 @@
+import math
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
 from PyQt6.QtWidgets import *
@@ -69,26 +70,29 @@ class AnimatedLineEdit(QLineEdit):
         self.timelineFontIn.setEasingCurve(self.easingCurve)
         self.timelineFontIn.valueChanged.connect(self.timelineFontInValueChanged)
 
+        self.timelinePositionStart = 0
+        self.timelineFontStart = 0
+
     def timelinePositionOutValueChanged(self, value):
-        self.positionCurrent.setY(int(self.positionCurrent.y() + (self.positionOuter.y() - self.positionCurrent.y()) * value))
+        self.positionCurrent.setY(math.floor(self.timelinePositionStart + (self.positionOuter.y() - self.timelinePositionStart) * value))
         if value > 0.2 and self.isPlaceholderInside:
             self.isPlaceholderInside = False
             self.placeholderColorCurrent = self.placeholderColorOutside if self.placeholderColorOutside is not None else self.placeholderColor
         self.update()
 
     def timelinePositionInValueChanged(self, value):
-        self.positionCurrent.setY(int(self.positionCurrent.y() + (self.positionInner.y() - self.positionCurrent.y()) * value))
+        self.positionCurrent.setY(math.ceil(self.timelinePositionStart + (self.positionInner.y() - self.timelinePositionStart) * value))
         if value > 0.2 and not self.isPlaceholderInside:
             self.isPlaceholderInside = True
             self.placeholderColorCurrent = self.placeholderColor
         self.update()
 
     def timelineFontOutValueChanged(self, value):
-        self.fontCurrent.setPointSize(int(self.fontCurrent.pointSize() - (self.fontCurrent.pointSize() - self.fontOuter.pointSize()) * value))
+        self.fontCurrent.setPointSize(math.floor(self.timelineFontStart + (self.fontOuter.pointSize() - self.timelineFontStart) * value))
         self.update()
 
     def timelineFontInValueChanged(self, value):
-        self.fontCurrent.setPointSize(int(self.fontCurrent.pointSize() - (self.fontCurrent.pointSize() - self.fontInner.pointSize()) * value))
+        self.fontCurrent.setPointSize(math.ceil(self.timelineFontStart + (self.fontInner.pointSize() - self.timelineFontStart) * value))
         self.update()
 
     def calculateDimensions(self):
@@ -121,6 +125,8 @@ class AnimatedLineEdit(QLineEdit):
         if not self.text():
             self.timelinePositionIn.stop()
             self.timelineFontIn.stop()
+            self.timelinePositionStart = self.positionCurrent.y()
+            self.timelineFontStart = self.fontCurrent.pointSize()
             self.timelinePositionOut.start()
             self.timelineFontOut.start()
 
@@ -129,6 +135,8 @@ class AnimatedLineEdit(QLineEdit):
         if not self.text():
             self.timelinePositionOut.stop()
             self.timelineFontOut.stop()
+            self.timelinePositionStart = self.positionCurrent.y()
+            self.timelineFontStart = self.fontCurrent.pointSize()
             self.timelinePositionIn.start()
             self.timelineFontIn.start()
 
