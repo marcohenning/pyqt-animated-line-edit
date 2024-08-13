@@ -1,7 +1,7 @@
 import math
-from PyQt6.QtGui import *
-from PyQt6.QtCore import *
-from PyQt6.QtWidgets import *
+from PyQt6.QtGui import QColor, QFont, QPalette, QPainter, QFontMetrics
+from PyQt6.QtCore import QEasingCurve, QTimeLine, QPoint
+from PyQt6.QtWidgets import QLineEdit
 
 
 class AnimatedLineEdit(QLineEdit):
@@ -10,23 +10,22 @@ class AnimatedLineEdit(QLineEdit):
         super(AnimatedLineEdit, self).__init__(parent)
 
         self.__placeholder_text = placeholder_text
-        self.__color = QColor(0, 0, 0)
         self.__placeholder_color = QColor(100, 100, 100)
         self.__placeholder_color_outside = None
         self.__placeholder_color_current = self.__placeholder_color
+        self.__placeholder_font_inner = self.font()
+        self.__placeholder_font_outer = self.font()
+        self.__placeholder_font_current = QFont(self.__placeholder_font_inner.family(),
+                                                self.__placeholder_font_inner.pointSize())
+        self.__transition_duration = 150
+        self.__transition_easing_curve = QEasingCurve.Type.InOutCubic
+        self.__color = QColor(0, 0, 0)
         self.__background_color = QColor(255, 255, 255)
         self.__border_color = QColor(0, 0, 0)
         self.__border_width = 1
         self.__border_radius = 0
-        self.__placeholder_text_start = max(15, self.__border_radius + 10)
-        self.__font_inner = self.font()
-        self.__font_outer = self.font()
-        self.__font_current = QFont(self.__font_inner.family(), self.__font_inner.pointSize())
-
-        self.__is_placeholder_inside = True
-        self.__easing_curve = QEasingCurve.Type.InOutCubic
-        self.__duration = 150
         self.__padding = [0, 0, 0, 0]
+        self.__placeholder_text_start = max(15, self.__border_radius + 10)
         self.__hovered_color = None
         self.__hovered_background_color = None
         self.__hovered_border_color = None
@@ -39,80 +38,102 @@ class AnimatedLineEdit(QLineEdit):
         self.__disabled_background_color = None
         self.__disabled_border_color = None
         self.__disabled_border_width = None
+        self.__is_placeholder_inside = True
 
         self.__calculate_geometry()
         self.__update_style_sheet()
 
-        self.__timeline_position_out = QTimeLine(self.__duration)
-        self.__timeline_position_out.setFrameRange(self.__position_current.y(), self.__position_outer.y())
-        self.__timeline_position_out.setEasingCurve(self.__easing_curve)
-        self.__timeline_position_out.valueChanged.connect(self.__timeline_position_out_value_changed)
-
-        self.__timeline_position_in = QTimeLine(self.__duration)
-        self.__timeline_position_in.setFrameRange(self.__position_current.y(), self.__position_inner.y())
-        self.__timeline_position_in.setEasingCurve(self.__easing_curve)
-        self.__timeline_position_in.valueChanged.connect(self.__timeline_position_in_value_changed)
-
-        self.__timeline_font_out = QTimeLine(self.__duration)
-        self.__timeline_font_out.setFrameRange(self.__font_current.pointSize(), self.__font_outer.pointSize())
-        self.__timeline_font_out.setEasingCurve(self.__easing_curve)
-        self.__timeline_font_out.valueChanged.connect(self.__timeline_font_out_value_changed)
-
-        self.__timeline_font_in = QTimeLine(self.__duration)
-        self.__timeline_font_in.setFrameRange(self.__font_current.pointSize(), self.__font_inner.pointSize())
-        self.__timeline_font_in.setEasingCurve(self.__easing_curve)
-        self.__timeline_font_in.valueChanged.connect(self.__timeline_font_in_value_changed)
-
         self.__timeline_position_start = 0
         self.__timeline_font_start = 0
 
+        self.__timeline_position_out = QTimeLine(self.__transition_duration)
+        self.__timeline_position_out.setFrameRange(self.__position_current.y(), self.__position_outer.y())
+        self.__timeline_position_out.setEasingCurve(self.__transition_easing_curve)
+        self.__timeline_position_out.valueChanged.connect(self.__timeline_position_out_value_changed)
+
+        self.__timeline_position_in = QTimeLine(self.__transition_duration)
+        self.__timeline_position_in.setFrameRange(self.__position_current.y(), self.__position_inner.y())
+        self.__timeline_position_in.setEasingCurve(self.__transition_easing_curve)
+        self.__timeline_position_in.valueChanged.connect(self.__timeline_position_in_value_changed)
+
+        self.__timeline_font_out = QTimeLine(self.__transition_duration)
+        self.__timeline_font_out.setFrameRange(self.__placeholder_font_current.pointSize(),
+                                               self.__placeholder_font_outer.pointSize())
+        self.__timeline_font_out.setEasingCurve(self.__transition_easing_curve)
+        self.__timeline_font_out.valueChanged.connect(self.__timeline_font_out_value_changed)
+
+        self.__timeline_font_in = QTimeLine(self.__transition_duration)
+        self.__timeline_font_in.setFrameRange(self.__placeholder_font_current.pointSize(),
+                                              self.__placeholder_font_inner.pointSize())
+        self.__timeline_font_in.setEasingCurve(self.__transition_easing_curve)
+        self.__timeline_font_in.valueChanged.connect(self.__timeline_font_in_value_changed)
+
+
     def __timeline_position_out_value_changed(self, value):
-        self.__position_current.setY(math.floor(self.__timeline_position_start + (self.__position_outer.y() - self.__timeline_position_start) * value))
+        self.__position_current.setY(
+            math.floor(self.__timeline_position_start +
+                       (self.__position_outer.y() - self.__timeline_position_start) * value))
 
         if value > 0.2 and self.__is_placeholder_inside:
             self.__is_placeholder_inside = False
-            self.__placeholder_color_current = self.__placeholder_color_outside if self.__placeholder_color_outside is not None else self.__placeholder_color
-
+            self.__placeholder_color_current = (self.__placeholder_color_outside if
+                                                self.__placeholder_color_outside is not None
+                                                else self.__placeholder_color)
         self.update()
 
     def __timeline_position_in_value_changed(self, value):
-        self.__position_current.setY(math.ceil(self.__timeline_position_start + (self.__position_inner.y() - self.__timeline_position_start) * value))
+        self.__position_current.setY(
+            math.ceil(self.__timeline_position_start +
+                      (self.__position_inner.y() - self.__timeline_position_start) * value))
 
         if value > 0.2 and not self.__is_placeholder_inside:
             self.__is_placeholder_inside = True
             self.__placeholder_color_current = self.__placeholder_color
-
         self.update()
 
     def __timeline_font_out_value_changed(self, value):
-        self.__font_current.setPointSize(math.floor(self.__timeline_font_start + (self.__font_outer.pointSize() - self.__timeline_font_start) * value))
+        self.__placeholder_font_current.setPointSize(
+            math.floor(self.__timeline_font_start +
+                       (self.__placeholder_font_outer.pointSize() - self.__timeline_font_start) * value))
         self.update()
 
     def __timeline_font_in_value_changed(self, value):
-        self.__font_current.setPointSize(math.ceil(self.__timeline_font_start + (self.__font_inner.pointSize() - self.__timeline_font_start) * value))
+        self.__placeholder_font_current.setPointSize(
+            math.ceil(self.__timeline_font_start +
+                      (self.__placeholder_font_inner.pointSize() - self.__timeline_font_start) * value))
         self.update()
 
     def __calculate_geometry(self):
-        self.__font_metrics_inner = QFontMetrics(self.__font_inner)
-        self.__font_metrics_outer = QFontMetrics(self.__font_outer)
+        self.__font_metrics_inner = QFontMetrics(self.__placeholder_font_inner)
+        self.__font_metrics_outer = QFontMetrics(self.__placeholder_font_outer)
         self.__text_inner_rect = self.__font_metrics_inner.tightBoundingRect(self.__placeholder_text)
         self.__text_outer_rect = self.__font_metrics_outer.tightBoundingRect(self.__placeholder_text)
-        self.__top_offset = math.ceil((self.__text_outer_rect.height() - (self.__border_width if self.__focused_border_width is None else self.__focused_border_width)) / 2)
+
+        self.__top_offset = math.ceil(
+            (self.__text_outer_rect.height() -
+             (self.__border_width if self.__focused_border_width is None else self.__focused_border_width)) / 2)
+
         self.setContentsMargins(0, self.__top_offset, 0, 0)
-        self.__position_inner = QPoint(self.__placeholder_text_start, self.__top_offset + (self.height() - self.__top_offset - math.ceil((self.height() - self.__top_offset - self.__text_inner_rect.height()) / 2)))
+
+        self.__position_inner = QPoint(
+            self.__placeholder_text_start,
+            self.__top_offset + (self.height() - self.__top_offset - math.ceil(
+                (self.height() - self.__top_offset - self.__text_inner_rect.height()) / 2)))
+
         self.__position_outer = QPoint(self.__placeholder_text_start, self.__text_outer_rect.height())
         self.__position_current = QPoint(self.__position_inner.x(), self.__position_inner.y())
 
     def paintEvent(self, event):
         super().paintEvent(event)
         painter = QPainter(self)
-        painter.setFont(self.__font_current)
+        painter.setFont(self.__placeholder_font_current)
 
         if not self.__is_placeholder_inside:
             painter.setPen(self.__background_color)
             for i in range(self.__border_width if self.__focused_border_width is None else self.__focused_border_width):
                 painter.drawLine(QPoint(self.__placeholder_text_start - 5, self.__top_offset + i),
-                                 QPoint(self.__placeholder_text_start + self.__text_outer_rect.width() + 5, self.__top_offset + i))
+                                 QPoint(self.__placeholder_text_start + self.__text_outer_rect.width() + 5,
+                                        self.__top_offset + i))
 
         painter.setPen(self.__placeholder_color_current)
         painter.drawText(self.__position_current, self.__placeholder_text)
@@ -123,7 +144,7 @@ class AnimatedLineEdit(QLineEdit):
             self.__timeline_position_in.stop()
             self.__timeline_font_in.stop()
             self.__timeline_position_start = self.__position_current.y()
-            self.__timeline_font_start = self.__font_current.pointSize()
+            self.__timeline_font_start = self.__placeholder_font_current.pointSize()
             self.__timeline_position_out.start()
             self.__timeline_font_out.start()
 
@@ -133,7 +154,7 @@ class AnimatedLineEdit(QLineEdit):
             self.__timeline_position_out.stop()
             self.__timeline_font_out.stop()
             self.__timeline_position_start = self.__position_current.y()
-            self.__timeline_font_start = self.__font_current.pointSize()
+            self.__timeline_font_start = self.__placeholder_font_current.pointSize()
             self.__timeline_position_in.start()
             self.__timeline_font_in.start()
 
@@ -240,40 +261,42 @@ class AnimatedLineEdit(QLineEdit):
         self.__placeholder_text_start = max(15, self.__border_radius + 10)
 
     def getFontInner(self):
-        return self.__font_inner
+        return self.__placeholder_font_inner
 
     def getFontOuter(self):
-        return self.__font_outer
+        return self.__placeholder_font_outer
 
     def setFontFamily(self, family):
-        self.__font_inner.setFamily(family)
-        self.__font_outer.setFamily(family)
-        self.__font_current = QFont(self.__font_inner.family(), self.__font_inner.pointSize())
-        self.__font_current.setWeight(self.__font_inner.weight())
-        self.__font_current.setItalic(self.__font_inner.italic())
+        self.__placeholder_font_inner.setFamily(family)
+        self.__placeholder_font_outer.setFamily(family)
+        self.__placeholder_font_current = QFont(self.__placeholder_font_inner.family(),
+                                                self.__placeholder_font_inner.pointSize())
+        self.__placeholder_font_current.setWeight(self.__placeholder_font_inner.weight())
+        self.__placeholder_font_current.setItalic(self.__placeholder_font_inner.italic())
         self.__calculate_geometry()
 
     def setFontSizeInner(self, size):
-        self.__font_inner.setPointSize(size)
-        self.__font_current = QFont(self.__font_inner.family(), self.__font_inner.pointSize())
-        self.__font_current.setWeight(self.__font_inner.weight())
-        self.__font_current.setItalic(self.__font_inner.italic())
+        self.__placeholder_font_inner.setPointSize(size)
+        self.__placeholder_font_current = QFont(self.__placeholder_font_inner.family(),
+                                                self.__placeholder_font_inner.pointSize())
+        self.__placeholder_font_current.setWeight(self.__placeholder_font_inner.weight())
+        self.__placeholder_font_current.setItalic(self.__placeholder_font_inner.italic())
         self.__calculate_geometry()
 
     def setFontSizeOuter(self, size):
-        self.__font_outer.setPointSize(size)
+        self.__placeholder_font_outer.setPointSize(size)
         self.__calculate_geometry()
 
     def setPlaceholderFontBold(self, enable):
-        self.__font_inner.setBold(enable)
-        self.__font_outer.setBold(enable)
-        self.__font_current.setBold(enable)
+        self.__placeholder_font_inner.setBold(enable)
+        self.__placeholder_font_outer.setBold(enable)
+        self.__placeholder_font_current.setBold(enable)
         self.__calculate_geometry()
 
     def setPlaceholderFontItalic(self, enable):
-        self.__font_inner.setItalic(enable)
-        self.__font_outer.setItalic(enable)
-        self.__font_current.setItalic(enable)
+        self.__placeholder_font_inner.setItalic(enable)
+        self.__placeholder_font_outer.setItalic(enable)
+        self.__placeholder_font_current.setItalic(enable)
         self.__calculate_geometry()
 
     def getPadding(self):
@@ -284,24 +307,24 @@ class AnimatedLineEdit(QLineEdit):
         self.__update_style_sheet()
 
     def getDuration(self):
-        return self.__duration
+        return self.__transition_duration
 
     def setDuration(self, duration):
-        self.__duration = duration
-        self.__timeline_position_in.setDuration(self.__duration)
-        self.__timeline_position_out.setDuration(self.__duration)
-        self.__timeline_font_in.setDuration(self.__duration)
-        self.__timeline_font_out.setDuration(self.__duration)
+        self.__transition_duration = duration
+        self.__timeline_position_in.setDuration(self.__transition_duration)
+        self.__timeline_position_out.setDuration(self.__transition_duration)
+        self.__timeline_font_in.setDuration(self.__transition_duration)
+        self.__timeline_font_out.setDuration(self.__transition_duration)
 
     def getEasingCurve(self):
-        return self.__easing_curve
+        return self.__transition_easing_curve
 
     def setEasingCurve(self, easingCurve):
-        self.__easing_curve = easingCurve
-        self.__timeline_position_in.setEasingCurve(self.__easing_curve)
-        self.__timeline_position_out.setEasingCurve(self.__easing_curve)
-        self.__timeline_font_in.setEasingCurve(self.__easing_curve)
-        self.__timeline_font_out.setEasingCurve(self.__easing_curve)
+        self.__transition_easing_curve = easingCurve
+        self.__timeline_position_in.setEasingCurve(self.__transition_easing_curve)
+        self.__timeline_position_out.setEasingCurve(self.__transition_easing_curve)
+        self.__timeline_font_in.setEasingCurve(self.__transition_easing_curve)
+        self.__timeline_font_out.setEasingCurve(self.__transition_easing_curve)
 
     def getHoveredColor(self):
         return self.__hovered_color
