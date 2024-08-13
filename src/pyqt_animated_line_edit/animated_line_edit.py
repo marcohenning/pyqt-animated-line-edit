@@ -6,137 +6,141 @@ from PyQt6.QtWidgets import *
 
 class AnimatedLineEdit(QLineEdit):
 
-    def __init__(self, placeholderText, parent=None):
+    def __init__(self, placeholder_text, parent=None):
         super(AnimatedLineEdit, self).__init__(parent)
 
-        self.placeholderText = placeholderText
-        self.color = QColor(0, 0, 0)
-        self.placeholderColor = QColor(100, 100, 100)
-        self.placeholderColorOutside = None
-        self.placeholderColorCurrent = self.placeholderColor
-        self.backgroundColor = QColor(255, 255, 255)
-        self.borderColor = QColor(0, 0, 0)
-        self.borderWidth = 1
-        self.borderRadius = 0
-        self.placeholderTextStart = max(15, self.borderRadius + 10)
-        self.fontInner = self.font()
-        self.fontOuter = self.font()
-        self.fontCurrent = QFont(self.fontInner.family(), self.fontInner.pointSize())
+        self.__placeholder_text = placeholder_text
+        self.__color = QColor(0, 0, 0)
+        self.__placeholder_color = QColor(100, 100, 100)
+        self.__placeholder_color_outside = None
+        self.__placeholder_color_current = self.__placeholder_color
+        self.__background_color = QColor(255, 255, 255)
+        self.__border_color = QColor(0, 0, 0)
+        self.__border_width = 1
+        self.__border_radius = 0
+        self.__placeholder_text_start = max(15, self.__border_radius + 10)
+        self.__font_inner = self.font()
+        self.__font_outer = self.font()
+        self.__font_current = QFont(self.__font_inner.family(), self.__font_inner.pointSize())
 
-        self.isPlaceholderInside = True
-        self.easingCurve = QEasingCurve.Type.InOutCubic
-        self.duration = 150
-        self.padding = [0, 0, 0, 0]
-        self.hoveredColor = None
-        self.hoveredBackgroundColor = None
-        self.hoveredBorderColor = None
-        self.hoveredBorderWidth = None
-        self.focussedColor = None
-        self.focussedBackgroundColor = None
-        self.focussedBorderColor = self.palette().color(QPalette.ColorRole.Highlight)
-        self.focussedBorderWidth = None
-        self.disabledColor = None
-        self.disabledBackgroundColor = None
-        self.disabledBorderColor = None
-        self.disabledBorderWidth = None
+        self.__is_placeholder_inside = True
+        self.__easing_curve = QEasingCurve.Type.InOutCubic
+        self.__duration = 150
+        self.__padding = [0, 0, 0, 0]
+        self.__hovered_color = None
+        self.__hovered_background_color = None
+        self.__hovered_border_color = None
+        self.__hovered_border_width = None
+        self.__focused_color = None
+        self.__focused_background_color = None
+        self.__focused_border_color = self.palette().color(QPalette.ColorRole.Highlight)
+        self.__focused_border_width = None
+        self.__disabled_color = None
+        self.__disabled_background_color = None
+        self.__disabled_border_color = None
+        self.__disabled_border_width = None
 
-        self.calculateDimensions()
-        self.updateStyleSheet()
+        self.__calculate_geometry()
+        self.__update_style_sheet()
 
-        self.timelinePositionOut = QTimeLine(self.duration)
-        self.timelinePositionOut.setFrameRange(self.positionCurrent.y(), self.positionOuter.y())
-        self.timelinePositionOut.setEasingCurve(self.easingCurve)
-        self.timelinePositionOut.valueChanged.connect(self.timelinePositionOutValueChanged)
+        self.__timeline_position_out = QTimeLine(self.__duration)
+        self.__timeline_position_out.setFrameRange(self.__position_current.y(), self.__position_outer.y())
+        self.__timeline_position_out.setEasingCurve(self.__easing_curve)
+        self.__timeline_position_out.valueChanged.connect(self.__timeline_position_out_value_changed)
 
-        self.timelinePositionIn = QTimeLine(self.duration)
-        self.timelinePositionIn.setFrameRange(self.positionCurrent.y(), self.positionInner.y())
-        self.timelinePositionIn.setEasingCurve(self.easingCurve)
-        self.timelinePositionIn.valueChanged.connect(self.timelinePositionInValueChanged)
+        self.__timeline_position_in = QTimeLine(self.__duration)
+        self.__timeline_position_in.setFrameRange(self.__position_current.y(), self.__position_inner.y())
+        self.__timeline_position_in.setEasingCurve(self.__easing_curve)
+        self.__timeline_position_in.valueChanged.connect(self.__timeline_position_in_value_changed)
 
-        self.timelineFontOut = QTimeLine(self.duration)
-        self.timelineFontOut.setFrameRange(self.fontCurrent.pointSize(), self.fontOuter.pointSize())
-        self.timelineFontOut.setEasingCurve(self.easingCurve)
-        self.timelineFontOut.valueChanged.connect(self.timelineFontOutValueChanged)
+        self.__timeline_font_out = QTimeLine(self.__duration)
+        self.__timeline_font_out.setFrameRange(self.__font_current.pointSize(), self.__font_outer.pointSize())
+        self.__timeline_font_out.setEasingCurve(self.__easing_curve)
+        self.__timeline_font_out.valueChanged.connect(self.__timeline_font_out_value_changed)
 
-        self.timelineFontIn = QTimeLine(self.duration)
-        self.timelineFontIn.setFrameRange(self.fontCurrent.pointSize(), self.fontInner.pointSize())
-        self.timelineFontIn.setEasingCurve(self.easingCurve)
-        self.timelineFontIn.valueChanged.connect(self.timelineFontInValueChanged)
+        self.__timeline_font_in = QTimeLine(self.__duration)
+        self.__timeline_font_in.setFrameRange(self.__font_current.pointSize(), self.__font_inner.pointSize())
+        self.__timeline_font_in.setEasingCurve(self.__easing_curve)
+        self.__timeline_font_in.valueChanged.connect(self.__timeline_font_in_value_changed)
 
-        self.timelinePositionStart = 0
-        self.timelineFontStart = 0
+        self.__timeline_position_start = 0
+        self.__timeline_font_start = 0
 
-    def timelinePositionOutValueChanged(self, value):
-        self.positionCurrent.setY(math.floor(self.timelinePositionStart + (self.positionOuter.y() - self.timelinePositionStart) * value))
-        if value > 0.2 and self.isPlaceholderInside:
-            self.isPlaceholderInside = False
-            self.placeholderColorCurrent = self.placeholderColorOutside if self.placeholderColorOutside is not None else self.placeholderColor
+    def __timeline_position_out_value_changed(self, value):
+        self.__position_current.setY(math.floor(self.__timeline_position_start + (self.__position_outer.y() - self.__timeline_position_start) * value))
+
+        if value > 0.2 and self.__is_placeholder_inside:
+            self.__is_placeholder_inside = False
+            self.__placeholder_color_current = self.__placeholder_color_outside if self.__placeholder_color_outside is not None else self.__placeholder_color
+
         self.update()
 
-    def timelinePositionInValueChanged(self, value):
-        self.positionCurrent.setY(math.ceil(self.timelinePositionStart + (self.positionInner.y() - self.timelinePositionStart) * value))
-        if value > 0.2 and not self.isPlaceholderInside:
-            self.isPlaceholderInside = True
-            self.placeholderColorCurrent = self.placeholderColor
+    def __timeline_position_in_value_changed(self, value):
+        self.__position_current.setY(math.ceil(self.__timeline_position_start + (self.__position_inner.y() - self.__timeline_position_start) * value))
+
+        if value > 0.2 and not self.__is_placeholder_inside:
+            self.__is_placeholder_inside = True
+            self.__placeholder_color_current = self.__placeholder_color
+
         self.update()
 
-    def timelineFontOutValueChanged(self, value):
-        self.fontCurrent.setPointSize(math.floor(self.timelineFontStart + (self.fontOuter.pointSize() - self.timelineFontStart) * value))
+    def __timeline_font_out_value_changed(self, value):
+        self.__font_current.setPointSize(math.floor(self.__timeline_font_start + (self.__font_outer.pointSize() - self.__timeline_font_start) * value))
         self.update()
 
-    def timelineFontInValueChanged(self, value):
-        self.fontCurrent.setPointSize(math.ceil(self.timelineFontStart + (self.fontInner.pointSize() - self.timelineFontStart) * value))
+    def __timeline_font_in_value_changed(self, value):
+        self.__font_current.setPointSize(math.ceil(self.__timeline_font_start + (self.__font_inner.pointSize() - self.__timeline_font_start) * value))
         self.update()
 
-    def calculateDimensions(self):
-        self.fontMetricsInner = QFontMetrics(self.fontInner)
-        self.fontMetricsOuter = QFontMetrics(self.fontOuter)
-        self.textInner = self.fontMetricsInner.tightBoundingRect(self.placeholderText)
-        self.textOuter = self.fontMetricsOuter.tightBoundingRect(self.placeholderText)
-        self.topOffset = math.ceil((self.textOuter.height() - (self.borderWidth if self.focussedBorderWidth is None else self.focussedBorderWidth)) / 2)
-        self.setContentsMargins(0, self.topOffset, 0, 0)
-        self.positionInner = QPoint(self.placeholderTextStart, self.topOffset + (self.height() - self.topOffset - math.ceil((self.height() - self.topOffset - self.textInner.height()) / 2)))
-        self.positionOuter = QPoint(self.placeholderTextStart, self.textOuter.height())
-        self.positionCurrent = QPoint(self.positionInner.x(), self.positionInner.y())
+    def __calculate_geometry(self):
+        self.__font_metrics_inner = QFontMetrics(self.__font_inner)
+        self.__font_metrics_outer = QFontMetrics(self.__font_outer)
+        self.__text_inner_rect = self.__font_metrics_inner.tightBoundingRect(self.__placeholder_text)
+        self.__text_outer_rect = self.__font_metrics_outer.tightBoundingRect(self.__placeholder_text)
+        self.__top_offset = math.ceil((self.__text_outer_rect.height() - (self.__border_width if self.__focused_border_width is None else self.__focused_border_width)) / 2)
+        self.setContentsMargins(0, self.__top_offset, 0, 0)
+        self.__position_inner = QPoint(self.__placeholder_text_start, self.__top_offset + (self.height() - self.__top_offset - math.ceil((self.height() - self.__top_offset - self.__text_inner_rect.height()) / 2)))
+        self.__position_outer = QPoint(self.__placeholder_text_start, self.__text_outer_rect.height())
+        self.__position_current = QPoint(self.__position_inner.x(), self.__position_inner.y())
 
     def paintEvent(self, event):
         super().paintEvent(event)
         painter = QPainter(self)
-        painter.setFont(self.fontCurrent)
+        painter.setFont(self.__font_current)
 
-        if not self.isPlaceholderInside:
-            painter.setPen(self.backgroundColor)
-            for i in range(self.borderWidth if self.focussedBorderWidth is None else self.focussedBorderWidth):
-                painter.drawLine(QPoint(self.placeholderTextStart - 5, self.topOffset + i),
-                                 QPoint(self.placeholderTextStart + self.textOuter.width() + 5, self.topOffset + i))
+        if not self.__is_placeholder_inside:
+            painter.setPen(self.__background_color)
+            for i in range(self.__border_width if self.__focused_border_width is None else self.__focused_border_width):
+                painter.drawLine(QPoint(self.__placeholder_text_start - 5, self.__top_offset + i),
+                                 QPoint(self.__placeholder_text_start + self.__text_outer_rect.width() + 5, self.__top_offset + i))
 
-        painter.setPen(self.placeholderColorCurrent)
-        painter.drawText(self.positionCurrent, self.placeholderText)
+        painter.setPen(self.__placeholder_color_current)
+        painter.drawText(self.__position_current, self.__placeholder_text)
 
     def focusInEvent(self, event):
         super().focusInEvent(event)
         if not self.text():
-            self.timelinePositionIn.stop()
-            self.timelineFontIn.stop()
-            self.timelinePositionStart = self.positionCurrent.y()
-            self.timelineFontStart = self.fontCurrent.pointSize()
-            self.timelinePositionOut.start()
-            self.timelineFontOut.start()
+            self.__timeline_position_in.stop()
+            self.__timeline_font_in.stop()
+            self.__timeline_position_start = self.__position_current.y()
+            self.__timeline_font_start = self.__font_current.pointSize()
+            self.__timeline_position_out.start()
+            self.__timeline_font_out.start()
 
     def focusOutEvent(self, event):
         super().focusOutEvent(event)
         if not self.text():
-            self.timelinePositionOut.stop()
-            self.timelineFontOut.stop()
-            self.timelinePositionStart = self.positionCurrent.y()
-            self.timelineFontStart = self.fontCurrent.pointSize()
-            self.timelinePositionIn.start()
-            self.timelineFontIn.start()
+            self.__timeline_position_out.stop()
+            self.__timeline_font_out.stop()
+            self.__timeline_position_start = self.__position_current.y()
+            self.__timeline_font_start = self.__font_current.pointSize()
+            self.__timeline_position_in.start()
+            self.__timeline_font_in.start()
 
     def resizeEvent(self, event):
-        self.calculateDimensions()
+        self.__calculate_geometry()
 
-    def updateStyleSheet(self):
+    def __update_style_sheet(self):
         self.setStyleSheet('QLineEdit {'
                            'color: %s;'
                            'background-color: %s;'
@@ -159,226 +163,226 @@ class AnimatedLineEdit(QLineEdit):
                            'background-color: %s;'
                            'border: %dpx solid %s;'
                            '}'
-                           % (self.color.name(),
-                              self.backgroundColor.name(),
-                              self.borderWidth,
-                              self.borderColor.name(),
-                              self.borderRadius,
-                              self.padding[0],
-                              self.padding[1],
-                              self.padding[2],
-                              self.padding[3],
-                              self.color.name() if self.hoveredColor is None else self.hoveredColor.name(),
-                              self.backgroundColor.name() if self.hoveredBackgroundColor is None else self.hoveredBackgroundColor.name(),
-                              self.borderWidth if self.hoveredBorderWidth is None else self.hoveredBorderWidth,
-                              self.borderColor.name() if self.hoveredBorderColor is None else self.hoveredBorderColor.name(),
-                              self.color.name() if self.focussedColor is None else self.focussedColor.name(),
-                              self.backgroundColor.name() if self.focussedBackgroundColor is None else self.focussedBackgroundColor.name(),
-                              self.borderWidth if self.focussedBorderWidth is None else self.focussedBorderWidth,
-                              self.borderColor.name() if self.focussedBorderColor is None else self.focussedBorderColor.name(),
-                              self.color.name() if self.disabledColor is None else self.disabledColor.name(),
-                              self.backgroundColor.name() if self.disabledBackgroundColor is None else self.disabledBackgroundColor.name(),
-                              self.borderWidth if self.disabledBorderWidth is None else self.disabledBorderWidth,
-                              self.borderColor.name() if self.disabledBorderColor is None else self.disabledBorderColor.name()))
+                           % (self.__color.name(),
+                              self.__background_color.name(),
+                              self.__border_width,
+                              self.__border_color.name(),
+                              self.__border_radius,
+                              self.__padding[0],
+                              self.__padding[1],
+                              self.__padding[2],
+                              self.__padding[3],
+                              self.__color.name() if self.__hovered_color is None else self.__hovered_color.name(),
+                              self.__background_color.name() if self.__hovered_background_color is None else self.__hovered_background_color.name(),
+                              self.__border_width if self.__hovered_border_width is None else self.__hovered_border_width,
+                              self.__border_color.name() if self.__hovered_border_color is None else self.__hovered_border_color.name(),
+                              self.__color.name() if self.__focused_color is None else self.__focused_color.name(),
+                              self.__background_color.name() if self.__focused_background_color is None else self.__focused_background_color.name(),
+                              self.__border_width if self.__focused_border_width is None else self.__focused_border_width,
+                              self.__border_color.name() if self.__focused_border_color is None else self.__focused_border_color.name(),
+                              self.__color.name() if self.__disabled_color is None else self.__disabled_color.name(),
+                              self.__background_color.name() if self.__disabled_background_color is None else self.__disabled_background_color.name(),
+                              self.__border_width if self.__disabled_border_width is None else self.__disabled_border_width,
+                              self.__border_color.name() if self.__disabled_border_color is None else self.__disabled_border_color.name()))
 
     def getPlaceholderText(self):
-        return self.placeholderText
+        return self.__placeholder_text
 
     def setPlaceholderText(self, text):
-        self.placeholderText = text
+        self.__placeholder_text = text
 
     def getColor(self):
-        return self.color
+        return self.__color
 
     def setColor(self, color):
-        self.color = color
-        self.updateStyleSheet()
+        self.__color = color
+        self.__update_style_sheet()
 
     def getPlaceholderColor(self):
-        return self.placeholderColor
+        return self.__placeholder_color
 
     def setPlaceholderColor(self, color):
-        self.placeholderColor = color
+        self.__placeholder_color = color
 
     def getPlaceholderColorOutside(self):
-        return self.placeholderColorOutside
+        return self.__placeholder_color_outside
 
     def setPlaceholderColorOutside(self, color):
-        self.placeholderColorOutside = color
+        self.__placeholder_color_outside = color
 
     def getBackgroundColor(self):
-        return self.backgroundColor
+        return self.__background_color
 
     def setBackgroundColor(self, color):
-        self.backgroundColor = color
-        self.updateStyleSheet()
+        self.__background_color = color
+        self.__update_style_sheet()
 
     def getBorderColor(self):
-        return self.borderColor
+        return self.__border_color
 
     def setBorderColor(self, color):
-        self.borderColor = color
-        self.updateStyleSheet()
+        self.__border_color = color
+        self.__update_style_sheet()
 
     def getBorderWidth(self):
-        return self.borderWidth
+        return self.__border_width
 
     def setBorderWidth(self, width):
-        self.borderWidth = width
-        self.updateStyleSheet()
+        self.__border_width = width
+        self.__update_style_sheet()
 
     def getBorderRadius(self):
-        return self.borderRadius
+        return self.__border_radius
 
     def setBorderRadius(self, radius):
-        self.borderRadius = radius
-        self.updateStyleSheet()
-        self.placeholderTextStart = max(15, self.borderRadius + 10)
+        self.__border_radius = radius
+        self.__update_style_sheet()
+        self.__placeholder_text_start = max(15, self.__border_radius + 10)
 
     def getFontInner(self):
-        return self.fontInner
+        return self.__font_inner
 
     def getFontOuter(self):
-        return self.fontOuter
+        return self.__font_outer
 
     def setFontFamily(self, family):
-        self.fontInner.setFamily(family)
-        self.fontOuter.setFamily(family)
-        self.fontCurrent = QFont(self.fontInner.family(), self.fontInner.pointSize())
-        self.fontCurrent.setWeight(self.fontInner.weight())
-        self.fontCurrent.setItalic(self.fontInner.italic())
-        self.calculateDimensions()
+        self.__font_inner.setFamily(family)
+        self.__font_outer.setFamily(family)
+        self.__font_current = QFont(self.__font_inner.family(), self.__font_inner.pointSize())
+        self.__font_current.setWeight(self.__font_inner.weight())
+        self.__font_current.setItalic(self.__font_inner.italic())
+        self.__calculate_geometry()
 
     def setFontSizeInner(self, size):
-        self.fontInner.setPointSize(size)
-        self.fontCurrent = QFont(self.fontInner.family(), self.fontInner.pointSize())
-        self.fontCurrent.setWeight(self.fontInner.weight())
-        self.fontCurrent.setItalic(self.fontInner.italic())
-        self.calculateDimensions()
+        self.__font_inner.setPointSize(size)
+        self.__font_current = QFont(self.__font_inner.family(), self.__font_inner.pointSize())
+        self.__font_current.setWeight(self.__font_inner.weight())
+        self.__font_current.setItalic(self.__font_inner.italic())
+        self.__calculate_geometry()
 
     def setFontSizeOuter(self, size):
-        self.fontOuter.setPointSize(size)
-        self.calculateDimensions()
+        self.__font_outer.setPointSize(size)
+        self.__calculate_geometry()
 
     def setPlaceholderFontBold(self, enable):
-        self.fontInner.setBold(enable)
-        self.fontOuter.setBold(enable)
-        self.fontCurrent.setBold(enable)
-        self.calculateDimensions()
+        self.__font_inner.setBold(enable)
+        self.__font_outer.setBold(enable)
+        self.__font_current.setBold(enable)
+        self.__calculate_geometry()
 
     def setPlaceholderFontItalic(self, enable):
-        self.fontInner.setItalic(enable)
-        self.fontOuter.setItalic(enable)
-        self.fontCurrent.setItalic(enable)
-        self.calculateDimensions()
+        self.__font_inner.setItalic(enable)
+        self.__font_outer.setItalic(enable)
+        self.__font_current.setItalic(enable)
+        self.__calculate_geometry()
 
     def getPadding(self):
-        return self.padding
+        return self.__padding
 
     def setPadding(self, top, right, bottom, left):
-        self.padding = [top, right, bottom, left]
-        self.updateStyleSheet()
+        self.__padding = [top, right, bottom, left]
+        self.__update_style_sheet()
 
     def getDuration(self):
-        return self.duration
+        return self.__duration
 
     def setDuration(self, duration):
-        self.duration = duration
-        self.timelinePositionIn.setDuration(self.duration)
-        self.timelinePositionOut.setDuration(self.duration)
-        self.timelineFontIn.setDuration(self.duration)
-        self.timelineFontOut.setDuration(self.duration)
+        self.__duration = duration
+        self.__timeline_position_in.setDuration(self.__duration)
+        self.__timeline_position_out.setDuration(self.__duration)
+        self.__timeline_font_in.setDuration(self.__duration)
+        self.__timeline_font_out.setDuration(self.__duration)
 
     def getEasingCurve(self):
-        return self.easingCurve
+        return self.__easing_curve
 
     def setEasingCurve(self, easingCurve):
-        self.easingCurve = easingCurve
-        self.timelinePositionIn.setEasingCurve(self.easingCurve)
-        self.timelinePositionOut.setEasingCurve(self.easingCurve)
-        self.timelineFontIn.setEasingCurve(self.easingCurve)
-        self.timelineFontOut.setEasingCurve(self.easingCurve)
+        self.__easing_curve = easingCurve
+        self.__timeline_position_in.setEasingCurve(self.__easing_curve)
+        self.__timeline_position_out.setEasingCurve(self.__easing_curve)
+        self.__timeline_font_in.setEasingCurve(self.__easing_curve)
+        self.__timeline_font_out.setEasingCurve(self.__easing_curve)
 
     def getHoveredColor(self):
-        return self.hoveredColor
+        return self.__hovered_color
 
     def setHoveredColor(self, color):
-        self.hoveredColor = color
-        self.updateStyleSheet()
+        self.__hovered_color = color
+        self.__update_style_sheet()
 
     def getHoveredBackgroundColor(self):
-        return self.hoveredBackgroundColor
+        return self.__hovered_background_color
 
     def setHoveredBackgroundColor(self, color):
-        self.hoveredBackgroundColor = color
-        self.updateStyleSheet()
+        self.__hovered_background_color = color
+        self.__update_style_sheet()
 
     def getHoveredBorderColor(self):
-        return self.hoveredBorderColor
+        return self.__hovered_border_color
 
     def setHoveredBorderColor(self, color):
-        self.hoveredBorderColor = color
-        self.updateStyleSheet()
+        self.__hovered_border_color = color
+        self.__update_style_sheet()
 
     def getHoveredBorderWidth(self):
-        return self.hoveredBorderWidth
+        return self.__hovered_border_width
 
     def setHoveredBorderWidth(self, width):
-        self.hoveredBorderWidth = width
-        self.updateStyleSheet()
+        self.__hovered_border_width = width
+        self.__update_style_sheet()
 
-    def getFocussedColor(self):
-        return self.focussedColor
+    def getFocusedColor(self):
+        return self.__focused_color
 
-    def setFocussedColor(self, color):
-        self.focussedColor = color
-        self.updateStyleSheet()
+    def setFocusedColor(self, color):
+        self.__focused_color = color
+        self.__update_style_sheet()
 
-    def getFocussedBackgroundColor(self):
-        return self.focussedBackgroundColor
+    def getFocusedBackgroundColor(self):
+        return self.__focused_background_color
 
-    def setFocussedBackgroundColor(self, color):
-        self.focussedBackgroundColor = color
-        self.updateStyleSheet()
+    def setFocusedBackgroundColor(self, color):
+        self.__focused_background_color = color
+        self.__update_style_sheet()
 
-    def getFocussedBorderColor(self):
-        return self.focussedBorderColor
+    def getFocusedBorderColor(self):
+        return self.__focused_border_color
 
-    def setFocussedBorderColor(self, color):
-        self.focussedBorderColor = color
-        self.updateStyleSheet()
+    def setFocusedBorderColor(self, color):
+        self.__focused_border_color = color
+        self.__update_style_sheet()
 
-    def getFocussedBorderWidth(self):
-        return self.focussedBorderWidth
+    def getFocusedBorderWidth(self):
+        return self.__focused_border_width
 
-    def setFocussedBorderWidth(self, width):
-        self.focussedBorderWidth = width
-        self.updateStyleSheet()
+    def setFocusedBorderWidth(self, width):
+        self.__focused_border_width = width
+        self.__update_style_sheet()
 
     def getDisabledColor(self):
-        return self.disabledColor
+        return self.__disabled_color
 
     def setDisabledColor(self, color):
-        self.disabledColor = color
-        self.updateStyleSheet()
+        self.__disabled_color = color
+        self.__update_style_sheet()
 
     def getDisabledBackgroundColor(self):
-        return self.disabledBackgroundColor
+        return self.__disabled_background_color
 
     def setDisabledBackgroundColor(self, color):
-        self.disabledBackgroundColor = color
-        self.updateStyleSheet()
+        self.__disabled_background_color = color
+        self.__update_style_sheet()
 
     def getDisabledBorderColor(self):
-        return self.disabledBorderColor
+        return self.__disabled_border_color
 
     def setDisabledBorderColor(self, color):
-        self.disabledBorderColor = color
-        self.updateStyleSheet()
+        self.__disabled_border_color = color
+        self.__update_style_sheet()
 
     def getDisabledBorderWidth(self):
-        return self.disabledBorderWidth
+        return self.__disabled_border_width
 
     def setDisabledBorderWidth(self, width):
-        self.disabledBorderWidth = width
-        self.updateStyleSheet()
+        self.__disabled_border_width = width
+        self.__update_style_sheet()
