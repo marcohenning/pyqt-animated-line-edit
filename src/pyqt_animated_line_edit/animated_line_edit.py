@@ -10,7 +10,7 @@ class AnimatedLineEdit(QLineEdit):
         super(AnimatedLineEdit, self).__init__(parent)
 
         self.__placeholder_text = placeholder_text
-        self.__placeholder_color = QColor(100, 100, 100)
+        self.__placeholder_color = self.palette().color(QPalette.ColorRole.Shadow)
         self.__placeholder_color_outside = None
         self.__placeholder_color_current = self.__placeholder_color
         self.__placeholder_font_inner = self.font()
@@ -21,7 +21,7 @@ class AnimatedLineEdit(QLineEdit):
         self.__transition_easing_curve = QEasingCurve.Type.InOutCubic
         self.__color = QColor(0, 0, 0)
         self.__background_color = QColor(255, 255, 255)
-        self.__border_color = QColor(0, 0, 0)
+        self.__border_color = self.palette().color(QPalette.ColorRole.Shadow)
         self.__border_width = 1
         self.__border_radius = 0
         self.__padding = [0, 0, 0, 0]
@@ -74,11 +74,8 @@ class AnimatedLineEdit(QLineEdit):
             math.floor(self.__timeline_position_start +
                        (self.__position_outer.y() - self.__timeline_position_start) * value))
 
-        if value > 0.2 and self.__is_placeholder_inside:
+        if value > 0.1 and self.__is_placeholder_inside:
             self.__is_placeholder_inside = False
-            self.__placeholder_color_current = (self.__placeholder_color_outside if
-                                                self.__placeholder_color_outside is not None
-                                                else self.__placeholder_color)
         self.update()
 
     def __timeline_position_in_value_changed(self, value):
@@ -86,9 +83,8 @@ class AnimatedLineEdit(QLineEdit):
             math.ceil(self.__timeline_position_start +
                       (self.__position_inner.y() - self.__timeline_position_start) * value))
 
-        if value > 0.2 and not self.__is_placeholder_inside:
+        if value > 0.8 and not self.__is_placeholder_inside:
             self.__is_placeholder_inside = True
-            self.__placeholder_color_current = self.__placeholder_color
         self.update()
 
     def __timeline_font_out_value_changed(self, value):
@@ -145,6 +141,9 @@ class AnimatedLineEdit(QLineEdit):
             self.__timeline_font_in.stop()
             self.__timeline_position_start = self.__position_current.y()
             self.__timeline_font_start = self.__placeholder_font_current.pointSize()
+            self.__placeholder_color_current = (self.__placeholder_color_outside if
+                                                self.__placeholder_color_outside is not None
+                                                else self.__placeholder_color)
             self.__timeline_position_out.start()
             self.__timeline_font_out.start()
 
@@ -155,6 +154,7 @@ class AnimatedLineEdit(QLineEdit):
             self.__timeline_font_out.stop()
             self.__timeline_position_start = self.__position_current.y()
             self.__timeline_font_start = self.__placeholder_font_current.pointSize()
+            self.__placeholder_color_current = self.__placeholder_color
             self.__timeline_position_in.start()
             self.__timeline_font_in.start()
 
