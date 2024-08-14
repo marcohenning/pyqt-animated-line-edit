@@ -1,6 +1,6 @@
 import math
 from PyQt6.QtGui import QColor, QFont, QPalette, QPainter, QFontMetrics
-from PyQt6.QtCore import QEasingCurve, QTimeLine, QPoint
+from PyQt6.QtCore import QEasingCurve, QTimeLine, QPoint, Qt
 from PyQt6.QtWidgets import QLineEdit
 
 
@@ -10,6 +10,7 @@ class AnimatedLineEdit(QLineEdit):
         super(AnimatedLineEdit, self).__init__(parent)
 
         self.__placeholder_text = placeholder_text
+        self.__placeholder_text_current = self.__placeholder_text
         self.__placeholder_color = self.palette().color(QPalette.ColorRole.Shadow)
         self.__placeholder_color_outside = None
         self.__placeholder_color_current = self.__placeholder_color
@@ -76,6 +77,7 @@ class AnimatedLineEdit(QLineEdit):
 
         if value > 0.1 and self.__is_placeholder_inside:
             self.__is_placeholder_inside = False
+
         self.update()
 
     def __timeline_position_in_value_changed(self, value):
@@ -85,28 +87,47 @@ class AnimatedLineEdit(QLineEdit):
 
         if value > 0.8 and not self.__is_placeholder_inside:
             self.__is_placeholder_inside = True
+
         self.update()
 
     def __timeline_font_out_value_changed(self, value):
         self.__placeholder_font_current.setPointSize(
             math.floor(self.__timeline_font_start +
                        (self.__placeholder_font_outer.pointSize() - self.__timeline_font_start) * value))
+
+        if self.__placeholder_font_current.pointSize() == self.__placeholder_font_outer.pointSize() and \
+                self.__placeholder_text_current != self.__placeholder_text_outer_elided:
+            self.__placeholder_text_current = self.__placeholder_text_outer_elided
+
         self.update()
 
     def __timeline_font_in_value_changed(self, value):
         self.__placeholder_font_current.setPointSize(
             math.ceil(self.__timeline_font_start +
                       (self.__placeholder_font_inner.pointSize() - self.__timeline_font_start) * value))
+
+        if self.__placeholder_font_current.pointSize() == self.__placeholder_font_inner.pointSize() and \
+                self.__placeholder_text_current != self.__placeholder_text_inner_elided:
+            self.__placeholder_text_current = self.__placeholder_text_inner_elided
+
         self.update()
 
     def __calculate_geometry(self):
         self.__font_metrics_inner = QFontMetrics(self.__placeholder_font_inner)
         self.__font_metrics_outer = QFontMetrics(self.__placeholder_font_outer)
-        self.__text_inner_rect = self.__font_metrics_inner.tightBoundingRect(self.__placeholder_text)
-        self.__text_outer_rect = self.__font_metrics_outer.tightBoundingRect(self.__placeholder_text)
+
+        self.__placeholder_text_inner_elided = self.__font_metrics_inner.elidedText(
+            self.__placeholder_text, Qt.TextElideMode.ElideRight, self.width() - self.__placeholder_text_start * 2)
+        self.__placeholder_text_outer_elided = self.__font_metrics_outer.elidedText(
+            self.__placeholder_text, Qt.TextElideMode.ElideRight, self.width() - self.__placeholder_text_start * 2)
+
+        self.__placeholder_text_current = self.__placeholder_text_inner_elided
+
+        self.__text_inner_bounds = self.__font_metrics_inner.tightBoundingRect(self.__placeholder_text_inner_elided)
+        self.__text_outer_bounds = self.__font_metrics_outer.tightBoundingRect(self.__placeholder_text_outer_elided)
 
         self.__top_offset = math.ceil(
-            (self.__text_outer_rect.height() -
+            (self.__text_outer_bounds.height() -
              (self.__border_width if self.__focused_border_width is None else self.__focused_border_width)) / 2)
 
         self.setContentsMargins(0, self.__top_offset, 0, 0)
@@ -114,9 +135,9 @@ class AnimatedLineEdit(QLineEdit):
         self.__position_inner = QPoint(
             self.__placeholder_text_start,
             self.__top_offset + (self.height() - self.__top_offset - math.ceil(
-                (self.height() - self.__top_offset - self.__text_inner_rect.height()) / 2)))
+                (self.height() - self.__top_offset - self.__text_inner_bounds.height()) / 2)))
 
-        self.__position_outer = QPoint(self.__placeholder_text_start, self.__text_outer_rect.height())
+        self.__position_outer = QPoint(self.__placeholder_text_start, self.__text_outer_bounds.height())
         self.__position_current = QPoint(self.__position_inner.x(), self.__position_inner.y())
 
     def paintEvent(self, event):
@@ -128,11 +149,11 @@ class AnimatedLineEdit(QLineEdit):
             painter.setPen(self.__background_color)
             for i in range(self.__border_width if self.__focused_border_width is None else self.__focused_border_width):
                 painter.drawLine(QPoint(self.__placeholder_text_start - 5, self.__top_offset + i),
-                                 QPoint(self.__placeholder_text_start + self.__text_outer_rect.width() + 5,
+                                 QPoint(self.__placeholder_text_start + self.__text_outer_bounds.width() + 5,
                                         self.__top_offset + i))
 
         painter.setPen(self.__placeholder_color_current)
-        painter.drawText(self.__position_current, self.__placeholder_text)
+        painter.drawText(self.__position_current, self.__placeholder_text_current)
 
     def focusInEvent(self, event):
         super().focusInEvent(event)
@@ -141,6 +162,10 @@ class AnimatedLineEdit(QLineEdit):
             self.__timeline_font_in.stop()
             self.__timeline_position_start = self.__position_current.y()
             self.__timeline_font_start = self.__placeholder_font_current.pointSize()
+
+            if len(self.__placeholder_text_outer_elided) <= len(self.__placeholder_text_inner_elided):
+                self.__placeholder_text_current = self.__placeholder_text_outer_elided
+
             self.__placeholder_color_current = (self.__placeholder_color_outside if
                                                 self.__placeholder_color_outside is not None
                                                 else self.__placeholder_color)
@@ -154,6 +179,10 @@ class AnimatedLineEdit(QLineEdit):
             self.__timeline_font_out.stop()
             self.__timeline_position_start = self.__position_current.y()
             self.__timeline_font_start = self.__placeholder_font_current.pointSize()
+
+            if len(self.__placeholder_text_inner_elided) <= len(self.__placeholder_text_outer_elided):
+                self.__placeholder_text_current = self.__placeholder_text_inner_elided
+
             self.__placeholder_color_current = self.__placeholder_color
             self.__timeline_position_in.start()
             self.__timeline_font_in.start()
