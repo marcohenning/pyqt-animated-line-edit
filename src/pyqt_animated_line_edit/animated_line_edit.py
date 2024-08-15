@@ -773,5 +773,7 @@ class AnimatedLineEdit(QLineEdit):
         self.__disabled_border_width = width
         self.__update_style_sheet()
 
-    def isPlaceholderInside(self):
+    def isPlaceholderInside(self) -> bool:
+        """Get the placeholder position"""
+
         return self.__is_placeholder_inside
