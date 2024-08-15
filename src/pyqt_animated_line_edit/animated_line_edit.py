@@ -1,7 +1,7 @@
 import math
-from PyQt6.QtGui import QColor, QFont, QPalette, QPainter, QFontMetrics
-from PyQt6.QtCore import QEasingCurve, QTimeLine, QPoint, Qt
-from PyQt6.QtWidgets import QLineEdit
+from qtpy.QtGui import QColor, QFont, QPalette, QPainter, QFontMetrics
+from qtpy.QtCore import QEasingCurve, QTimeLine, QPoint, Qt, QMargins
+from qtpy.QtWidgets import QLineEdit
 
 
 class AnimatedLineEdit(QLineEdit):
@@ -39,7 +39,7 @@ class AnimatedLineEdit(QLineEdit):
         self.__placeholder_color_current = self.__placeholder_color
         self.__border_width = 1
         self.__border_radius = 0
-        self.__padding = [0, 0, 0, 0]
+        self.__padding = QMargins()
         self.__hovered_color = None
         self.__hovered_background_color = None
         self.__hovered_border_color = None
@@ -286,10 +286,10 @@ class AnimatedLineEdit(QLineEdit):
                               self.__border_width,
                               self.__border_color.name(),
                               self.__border_radius,
-                              self.__padding[0],
-                              self.__padding[1],
-                              self.__padding[2],
-                              self.__padding[3],
+                              self.__padding.top(),
+                              self.__padding.right(),
+                              self.__padding.bottom(),
+                              self.__padding.left(),
                               self.__color.name() if self.__hovered_color is None else self.__hovered_color.name(),
                               self.__background_color.name() if self.__hovered_background_color is None else self.__hovered_background_color.name(),
                               self.__border_width if self.__hovered_border_width is None else self.__hovered_border_width,
@@ -303,7 +303,7 @@ class AnimatedLineEdit(QLineEdit):
                               self.__border_width if self.__disabled_border_width is None else self.__disabled_border_width,
                               self.__border_color.name() if self.__disabled_border_color is None else self.__disabled_border_color.name()))
 
-    def getPlaceholderText(self):
+    def getPlaceholderText(self) -> str:
         """Get the current placeholder text
 
         :return: placeholder text
@@ -311,7 +311,7 @@ class AnimatedLineEdit(QLineEdit):
 
         return self.__placeholder_text
 
-    def setPlaceholderText(self, text):
+    def setPlaceholderText(self, text: str):
         """Set the placeholder text
 
         :param text: new placeholder text
@@ -319,7 +319,7 @@ class AnimatedLineEdit(QLineEdit):
 
         self.__placeholder_text = text
 
-    def getColor(self):
+    def getColor(self) -> QColor:
         """Get the current text color
 
         :return: text color
@@ -327,7 +327,7 @@ class AnimatedLineEdit(QLineEdit):
 
         return self.__color
 
-    def setColor(self, color):
+    def setColor(self, color: QColor):
         """Set the text color
 
         :param color: new text color
@@ -336,7 +336,7 @@ class AnimatedLineEdit(QLineEdit):
         self.__color = color
         self.__update_style_sheet()
 
-    def getPlaceholderColor(self):
+    def getPlaceholderColor(self) -> QColor:
         """Get the current placeholder text color
 
         :return: placeholder text color
@@ -344,7 +344,7 @@ class AnimatedLineEdit(QLineEdit):
 
         return self.__placeholder_color
 
-    def setPlaceholderColor(self, color):
+    def setPlaceholderColor(self, color: QColor):
         """Set the placeholder text color
 
         :param color: new placeholder text color
@@ -352,7 +352,7 @@ class AnimatedLineEdit(QLineEdit):
 
         self.__placeholder_color = color
 
-    def getPlaceholderColorOutside(self):
+    def getPlaceholderColorOutside(self) -> QColor:
         """Get the current placeholder text color for the outside position.
         If this is not set the color for the inside position will be used
 
@@ -361,7 +361,7 @@ class AnimatedLineEdit(QLineEdit):
 
         return self.__placeholder_color_outside
 
-    def setPlaceholderColorOutside(self, color):
+    def setPlaceholderColorOutside(self, color: QColor):
         """Set the placeholder text color for the outside position
 
         :param color: new placeholder text color for the outside position
@@ -369,7 +369,7 @@ class AnimatedLineEdit(QLineEdit):
 
         self.__placeholder_color_outside = color
 
-    def getBackgroundColor(self):
+    def getBackgroundColor(self) -> QColor:
         """Get the current background color
 
         :return: background color
@@ -377,7 +377,7 @@ class AnimatedLineEdit(QLineEdit):
 
         return self.__background_color
 
-    def setBackgroundColor(self, color):
+    def setBackgroundColor(self, color: QColor):
         """Set the background color
 
         :param color: new background color
@@ -386,7 +386,7 @@ class AnimatedLineEdit(QLineEdit):
         self.__background_color = color
         self.__update_style_sheet()
 
-    def getBorderColor(self):
+    def getBorderColor(self) -> QColor:
         """Get the current border color
 
         :return: border color
@@ -394,7 +394,7 @@ class AnimatedLineEdit(QLineEdit):
 
         return self.__border_color
 
-    def setBorderColor(self, color):
+    def setBorderColor(self, color: QColor):
         """Set the border color
 
         :param color: new border color
@@ -403,7 +403,7 @@ class AnimatedLineEdit(QLineEdit):
         self.__border_color = color
         self.__update_style_sheet()
 
-    def getBorderWidth(self):
+    def getBorderWidth(self) -> int:
         """Get the current border width
 
         :return: border width
@@ -411,7 +411,7 @@ class AnimatedLineEdit(QLineEdit):
 
         return self.__border_width
 
-    def setBorderWidth(self, width):
+    def setBorderWidth(self, width: int):
         """Set the border width
 
         :param width: new border width
@@ -420,7 +420,7 @@ class AnimatedLineEdit(QLineEdit):
         self.__border_width = width
         self.__update_style_sheet()
 
-    def getBorderRadius(self):
+    def getBorderRadius(self) -> int:
         """Get the current border radius
 
         :return: border radius
@@ -428,7 +428,7 @@ class AnimatedLineEdit(QLineEdit):
 
         return self.__border_radius
 
-    def setBorderRadius(self, radius):
+    def setBorderRadius(self, radius: int):
         """Set the border radius
 
         :param radius: new border radius
@@ -438,7 +438,7 @@ class AnimatedLineEdit(QLineEdit):
         self.__update_style_sheet()
         self.__placeholder_text_start = max(15, self.__border_radius + 10)
 
-    def getFontInner(self):
+    def getPlaceholderFontInner(self) -> QFont:
         """Get the current placeholder text font for the inside position
 
         :return: placeholder text font for the inside position
@@ -446,7 +446,7 @@ class AnimatedLineEdit(QLineEdit):
 
         return self.__placeholder_font_inner
 
-    def getFontOuter(self):
+    def getPlaceholderFontOuter(self) -> QFont:
         """Get the current placeholder text font for the outside position
 
         :return: placeholder text font for the outside position
@@ -454,7 +454,7 @@ class AnimatedLineEdit(QLineEdit):
 
         return self.__placeholder_font_outer
 
-    def setFontFamily(self, family):
+    def setPlaceholderFontFamily(self, family: str):
         """Set the font family of the placeholder text for all positions
 
         :param family: new font family of the placeholder text
@@ -468,7 +468,7 @@ class AnimatedLineEdit(QLineEdit):
         self.__placeholder_font_current.setItalic(self.__placeholder_font_inner.italic())
         self.__calculate_geometry()
 
-    def setFontSizeInner(self, size):
+    def setPlaceholderFontSizeInner(self, size: int):
         """Set the placeholder text font size for the inside position
 
         :param size: new placeholder text font size for the inside position
@@ -481,7 +481,7 @@ class AnimatedLineEdit(QLineEdit):
         self.__placeholder_font_current.setItalic(self.__placeholder_font_inner.italic())
         self.__calculate_geometry()
 
-    def setFontSizeOuter(self, size):
+    def setPlaceholderFontSizeOuter(self, size: int):
         """Set the placeholder text font size for the outside position
 
         :param size: new placeholder text font size for the outside position
@@ -490,7 +490,7 @@ class AnimatedLineEdit(QLineEdit):
         self.__placeholder_font_outer.setPointSize(size)
         self.__calculate_geometry()
 
-    def setPlaceholderFontBold(self, enable):
+    def setPlaceholderFontBold(self, enable: bool):
         """Set whether the placeholder text font should be bold
 
         :param enable: whether the placeholder text font should be bold
@@ -501,7 +501,7 @@ class AnimatedLineEdit(QLineEdit):
         self.__placeholder_font_current.setBold(enable)
         self.__calculate_geometry()
 
-    def setPlaceholderFontItalic(self, enable):
+    def setPlaceholderFontItalic(self, enable: bool):
         """Set whether the placeholder text font should be italic
 
         :param enable: whether the placeholder text font should be italic
@@ -512,7 +512,7 @@ class AnimatedLineEdit(QLineEdit):
         self.__placeholder_font_current.setItalic(enable)
         self.__calculate_geometry()
 
-    def getPadding(self):
+    def getPadding(self) -> QMargins:
         """Get the current padding of the widget
 
         :return: current padding
@@ -520,19 +520,16 @@ class AnimatedLineEdit(QLineEdit):
 
         return self.__padding
 
-    def setPadding(self, top, right, bottom, left):
+    def setPadding(self, padding: QMargins):
         """Set the padding of the widget
 
-        :param top: top padding
-        :param right: right padding
-        :param bottom: bottom padding
-        :param left: left padding
+        :param padding: padding of the widget
         """
 
-        self.__padding = [top, right, bottom, left]
+        self.__padding = padding
         self.__update_style_sheet()
 
-    def getDuration(self):
+    def getTransitionDuration(self) -> int:
         """Get the current transition duration of the placeholder text
 
         :return: transition duration of the placeholder text
@@ -540,7 +537,7 @@ class AnimatedLineEdit(QLineEdit):
 
         return self.__transition_duration
 
-    def setDuration(self, duration):
+    def setTransitionDuration(self, duration: int):
         """Set the transition duration of the placeholder text
 
         :param duration: new transition duration of the placeholder text
@@ -552,7 +549,7 @@ class AnimatedLineEdit(QLineEdit):
         self.__timeline_font_in.setDuration(self.__transition_duration)
         self.__timeline_font_out.setDuration(self.__transition_duration)
 
-    def getEasingCurve(self):
+    def getEasingCurve(self) -> QEasingCurve.Type:
         """Get the current easing curve used for the placeholder text transition
 
         :return: easing curve used for the placeholder text transition
@@ -560,7 +557,7 @@ class AnimatedLineEdit(QLineEdit):
 
         return self.__transition_easing_curve
 
-    def setEasingCurve(self, easing_curve):
+    def setEasingCurve(self, easing_curve: QEasingCurve.Type):
         """Set the easing curve used for the placeholder text transition
 
         :param easing_curve: new easing curve used for the placeholder text transition
@@ -572,7 +569,7 @@ class AnimatedLineEdit(QLineEdit):
         self.__timeline_font_in.setEasingCurve(self.__transition_easing_curve)
         self.__timeline_font_out.setEasingCurve(self.__transition_easing_curve)
 
-    def getHoveredColor(self):
+    def getHoveredColor(self) -> QColor:
         """Get the current hovered text color
 
         :return: hovered text color
@@ -580,7 +577,7 @@ class AnimatedLineEdit(QLineEdit):
 
         return self.__hovered_color
 
-    def setHoveredColor(self, color):
+    def setHoveredColor(self, color: QColor):
         """Set the hovered text color
 
         :param color: new hovered text color
@@ -589,7 +586,7 @@ class AnimatedLineEdit(QLineEdit):
         self.__hovered_color = color
         self.__update_style_sheet()
 
-    def getHoveredBackgroundColor(self):
+    def getHoveredBackgroundColor(self) -> QColor:
         """Get the current hovered background color
 
         :return: hovered background color
@@ -597,7 +594,7 @@ class AnimatedLineEdit(QLineEdit):
 
         return self.__hovered_background_color
 
-    def setHoveredBackgroundColor(self, color):
+    def setHoveredBackgroundColor(self, color: QColor):
         """Set the hovered background color
 
         :param color: new hovered background color
@@ -606,7 +603,7 @@ class AnimatedLineEdit(QLineEdit):
         self.__hovered_background_color = color
         self.__update_style_sheet()
 
-    def getHoveredBorderColor(self):
+    def getHoveredBorderColor(self) -> QColor:
         """Get the current hovered border color
 
         :return: hovered border color
@@ -614,7 +611,7 @@ class AnimatedLineEdit(QLineEdit):
 
         return self.__hovered_border_color
 
-    def setHoveredBorderColor(self, color):
+    def setHoveredBorderColor(self, color: QColor):
         """Set the hovered border color
 
         :param color: new hovered border color
@@ -623,7 +620,7 @@ class AnimatedLineEdit(QLineEdit):
         self.__hovered_border_color = color
         self.__update_style_sheet()
 
-    def getHoveredBorderWidth(self):
+    def getHoveredBorderWidth(self) -> int:
         """Get the current hovered border width
 
         :return: hovered border width
@@ -631,7 +628,7 @@ class AnimatedLineEdit(QLineEdit):
 
         return self.__hovered_border_width
 
-    def setHoveredBorderWidth(self, width):
+    def setHoveredBorderWidth(self, width: int):
         """Set the hovered border width
 
         :param width: new hovered border width
@@ -640,7 +637,7 @@ class AnimatedLineEdit(QLineEdit):
         self.__hovered_border_width = width
         self.__update_style_sheet()
 
-    def getFocusedColor(self):
+    def getFocusedColor(self) -> QColor:
         """Get the current focused text color
 
         :return: focused text color
@@ -648,7 +645,7 @@ class AnimatedLineEdit(QLineEdit):
 
         return self.__focused_color
 
-    def setFocusedColor(self, color):
+    def setFocusedColor(self, color: QColor):
         """Set the focused text color
 
         :param color: new focused text color
@@ -657,7 +654,7 @@ class AnimatedLineEdit(QLineEdit):
         self.__focused_color = color
         self.__update_style_sheet()
 
-    def getFocusedBackgroundColor(self):
+    def getFocusedBackgroundColor(self) -> QColor:
         """Get the current focused background color
 
         :return: focused background color
@@ -665,7 +662,7 @@ class AnimatedLineEdit(QLineEdit):
 
         return self.__focused_background_color
 
-    def setFocusedBackgroundColor(self, color):
+    def setFocusedBackgroundColor(self, color: QColor):
         """Set the focused background color
 
         :param color: new focused background color
@@ -674,7 +671,7 @@ class AnimatedLineEdit(QLineEdit):
         self.__focused_background_color = color
         self.__update_style_sheet()
 
-    def getFocusedBorderColor(self):
+    def getFocusedBorderColor(self) -> QColor:
         """Get the current focused border color
 
         :return: focused border color
@@ -682,7 +679,7 @@ class AnimatedLineEdit(QLineEdit):
 
         return self.__focused_border_color
 
-    def setFocusedBorderColor(self, color):
+    def setFocusedBorderColor(self, color: QColor):
         """Set the focused border color
 
         :param color: new focused border color
@@ -691,7 +688,7 @@ class AnimatedLineEdit(QLineEdit):
         self.__focused_border_color = color
         self.__update_style_sheet()
 
-    def getFocusedBorderWidth(self):
+    def getFocusedBorderWidth(self) -> int:
         """Get the current focused border width
 
         :return: focused border width
@@ -699,7 +696,7 @@ class AnimatedLineEdit(QLineEdit):
 
         return self.__focused_border_width
 
-    def setFocusedBorderWidth(self, width):
+    def setFocusedBorderWidth(self, width: int):
         """Set the focused border width
 
         :param width: new focused border width
@@ -708,7 +705,7 @@ class AnimatedLineEdit(QLineEdit):
         self.__focused_border_width = width
         self.__update_style_sheet()
 
-    def getDisabledColor(self):
+    def getDisabledColor(self) -> QColor:
         """Get the current disabled text color
 
         :return: disabled text color
@@ -716,7 +713,7 @@ class AnimatedLineEdit(QLineEdit):
 
         return self.__disabled_color
 
-    def setDisabledColor(self, color):
+    def setDisabledColor(self, color: QColor):
         """Set the disabled text color
 
         :param color: new disabled text color
@@ -725,7 +722,7 @@ class AnimatedLineEdit(QLineEdit):
         self.__disabled_color = color
         self.__update_style_sheet()
 
-    def getDisabledBackgroundColor(self):
+    def getDisabledBackgroundColor(self) -> QColor:
         """Get the current disabled background color
 
         :return: disabled background color
@@ -733,7 +730,7 @@ class AnimatedLineEdit(QLineEdit):
 
         return self.__disabled_background_color
 
-    def setDisabledBackgroundColor(self, color):
+    def setDisabledBackgroundColor(self, color: QColor):
         """Set the disabled background color
 
         :param color: new disabled background color
@@ -742,7 +739,7 @@ class AnimatedLineEdit(QLineEdit):
         self.__disabled_background_color = color
         self.__update_style_sheet()
 
-    def getDisabledBorderColor(self):
+    def getDisabledBorderColor(self) -> QColor:
         """Get the current disabled border color
 
         :return: disabled border color
@@ -750,7 +747,7 @@ class AnimatedLineEdit(QLineEdit):
 
         return self.__disabled_border_color
 
-    def setDisabledBorderColor(self, color):
+    def setDisabledBorderColor(self, color: QColor):
         """Set the disabled border color
 
         :param color: new disabled border color
@@ -759,7 +756,7 @@ class AnimatedLineEdit(QLineEdit):
         self.__disabled_border_color = color
         self.__update_style_sheet()
 
-    def getDisabledBorderWidth(self):
+    def getDisabledBorderWidth(self) -> int:
         """Get the current disabled border width
 
         :return: disabled border width
@@ -767,7 +764,7 @@ class AnimatedLineEdit(QLineEdit):
 
         return self.__disabled_border_width
 
-    def setDisabledBorderWidth(self, width):
+    def setDisabledBorderWidth(self, width: int):
         """Set the disabled border width
 
         :param width: new disabled border width
