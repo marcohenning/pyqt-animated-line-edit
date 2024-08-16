@@ -13,7 +13,7 @@ The widget is based on Qt's QLineEdit widget and improves it by animating the pl
 ## Installation
 
 ```
-pip install ...
+pip install pyqt-animated-line-edit
 ```
 
 ## Example
