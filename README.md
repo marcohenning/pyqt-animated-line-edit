@@ -4,7 +4,7 @@ shields
 
 A modern and animated version of the QLineEdit widget for PyQt and PySide.
 
-gif
+![Main](https://github.com/user-attachments/assets/267832aa-44a3-4532-aca9-7e3b393e8a4b)
 
 ## About
 
