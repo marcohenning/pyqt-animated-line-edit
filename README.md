@@ -2,13 +2,13 @@
 
 shields
 
-short description
+A modern and animated version of the QLineEdit widget for PyQt and PySide.
 
 gif
 
 ## About
 
-long description
+The widget is based on Qt's QLineEdit widget and improves it by animating the placeholder text between two positions. If the widget is not in focus and does not contain any text, the placeholder will be in the normal (inside) position. When the widget is focused, however, the placeholder text moves to the top of the widget (outside position), creating a gap in the border. If the widget loses focus and does not contain any text, the placeholder moves to the normal position again. If the widget contains text, the placeholder will stay in position. This way the placeholder is always visible. The widget is highly customizable with options such as changing the duration and easing curve of the animation and changing the font and color for both placeholder positions independently.
 
 ## Installation
 
@@ -19,64 +19,68 @@ pip install ...
 ## Example
 
 ```python
-from PyQt6.QtGui import QPalette
+import sys
 from PyQt6.QtCore import QMargins
-from PyQt6.QtWidgets import QMainWindow
+from PyQt6.QtWidgets import QMainWindow, QApplication
 from pyqt_animated_line_edit import AnimatedLineEdit
 
 
 class Window(QMainWindow):
+
     def __init__(self):
         super().__init__(parent=None)
 
-        # Window settings
-        self.setWindowTitle('Example')
-        self.setFixedSize(300, 165)
-
         # AnimatedLineEdit
         self.username = AnimatedLineEdit('Username', self)
-        self.username.setGeometry(90, 37, 120, 35)
         self.username.setBorderRadius(2)
         self.username.setPlaceholderFontSizeInner(10)
         self.username.setPlaceholderFontSizeOuter(8)
         self.username.setPadding(QMargins(12, 0, 12, 0))
-        self.username.setPlaceholderColorOutside(
-            self.palette().color(QPalette.ColorRole.Highlight))
+
+
+# Run the example
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    window = Window()
+    window.show()
+    app.exec()
 ```
 
 ## Documentation
 
-| Method                                                  | Description                                                  |
-|---------------------------------------------------------|--------------------------------------------------------------|
-| `setPlaceholderText(self, text: str)`                   | Set the placeholder text                                     |
-| `setColor(self, color: QColor)`                         | Set the text color                                           |
-| `setPlaceholderColor(self, color: QColor)`              | Set the placeholder text color                               |
-| `setPlaceholderColorOutside(self, color: QColor)`       | Set the placeholder text color for the outside position      |
-| `setBackgroundColor(self, color: QColor)`               | Set the background color                                     |
-| `setBorderColor(self, color: QColor)`                   | Set the border color                                         |
-| `setBorderWidth(self, width: int)`                      | Set the border width                                         |
-| `setBorderRadius(self, radius: int)`                    | Set the border radius                                        |
-| `setPlaceholderFontFamily(self, family: str)`           | Set the placeholder text font family                         |
-| `setPlaceholderFontSizeInner(self, size: int)`          | Set the placeholder text font size for the inside position   |
-| `setPlaceholderFontSizeOuter(self, size: int)`          | Set the placeholder text font size for the outside position  |
-| `setPlaceholderFontBold(self, enable: bool)`            | Set the placeholder text bold                                |
-| `setPlaceholderFontItalic(self, enable: bool)`          | Set the placeholder text italic                              |
-| `setPadding(self, padding: QMargins)`                   | Set the padding                                              |
-| `setTransitionDuration(self, duration: int)`            | Set the duration of the placeholder transition animation     |
-| `setEasingCurve(self, easing_curve: QEasingCurve.Type)` | Set the easing curve of the placeholder transition animation |
-| `setHoveredColor(self, color: QColor)`                  | Set the hovered text color                                   |
-| `setHoveredBackgroundColor(self, color: QColor)`        | Set the hovered background color                             |
-| `setHoveredBorderColor(self, color: QColor)`            | Set the hovered border color                                 |
-| `setHoveredBorderWidth(self, width: int)`               | Set the hovered border width                                 |
-| `setFocusedColor(self, color: QColor)`                  | Set the focused text color                                   |
-| `setFocusedBackgroundColor(self, color: QColor)`        | Set the focused background color                             |
-| `setFocusedBorderColor(self, color: QColor)`            | Set the focused border color                                 |
-| `setFocusedBorderWidth(self, width: int)`               | Set the focused border width                                 |
-| `setDisabledColor(self, color: QColor)`                 | Set the disabled text color                                  |
-| `setDisabledBackgroundColor(self, color: QColor)`       | Set the disabled background color                            |
-| `setDisabledBorderColor(self, color: QColor)`           | Set the disabled border color                                |
-| `setDisabledBorderWidth(self, width: int)`              | Set the disabled border width                                |
+> **IMPORTANT:** <br>Styling of the widget must not be done by setting the stylesheet manually as the widget calculates the stylesheet itself and overrides it. Use the provided methods such as `setBackgroundColor()`, `setHoveredBackgroundColor()`, `setFocusedBackgroundColor()` and `setDisabledBackgroundColor()` instead.
+
+| Method                                                  | Description                                                                                                 |
+|---------------------------------------------------------|-------------------------------------------------------------------------------------------------------------|
+| `setPlaceholderText(self, text: str)`                   | Set the text displayed as placeholder                                                                       |
+| `setTransitionDuration(self, duration: int)`            | Set the duration of the placeholder transition animation                                                    |
+| `setEasingCurve(self, easing_curve: QEasingCurve.Type)` | Set the easing curve of the placeholder transition animation                                                |
+| `setPlaceholderColor(self, color: QColor)`              | Set the color of the placeholder text (for both positions if the color for the outside position is not set) |
+| `setPlaceholderColorOutside(self, color: QColor)`       | Set the color of the placeholder text for the outside position                                              |
+| `setPlaceholderFontFamily(self, family: str)`           | Set the font family of the placeholder text (both positions)                                                |
+| `setPlaceholderFontSizeInner(self, size: int)`          | Set the font size of the placeholder text for the inside position                                           |
+| `setPlaceholderFontSizeOuter(self, size: int)`          | Set the font size of the placeholder text for the outside position                                          |
+| `setPlaceholderFontBold(self, enable: bool)`            | Set the weight of the placeholder text to be bold or regular                                                |
+| `setPlaceholderFontItalic(self, enable: bool)`          | Set the placeholder text to be italic or regular                                                            |
+| `setColor(self, color: QColor)`                         | Set the regular color of the text                                                                           |
+| `setBackgroundColor(self, color: QColor)`               | Set the regular color of the background                                                                     |
+| `setBorderColor(self, color: QColor)`                   | Set the regular color of the border                                                                         |
+| `setBorderWidth(self, width: int)`                      | Set the regular width of the border                                                                         |
+| `setBorderRadius(self, radius: int)`                    | Set the radius of the border                                                                                |
+| `setPadding(self, padding: QMargins)`                   | Set the padding of the widget                                                                               |
+| `setHoveredColor(self, color: QColor)`                  | Set the text color for when the widget is hovered over                                                      |
+| `setHoveredBackgroundColor(self, color: QColor)`        | Set the background color for when the widget is hovered over                                                |
+| `setHoveredBorderColor(self, color: QColor)`            | Set the border color for when the widget is hovered over                                                    |
+| `setHoveredBorderWidth(self, width: int)`               | Set the border width for when the widget is hovered over                                                    |
+| `setFocusedColor(self, color: QColor)`                  | Set the text color for when the widget is focused                                                           |
+| `setFocusedBackgroundColor(self, color: QColor)`        | Set the background color for when the widget is focused                                                     |
+| `setFocusedBorderColor(self, color: QColor)`            | Set the border color for when the widget is focused                                                         |
+| `setFocusedBorderWidth(self, width: int)`               | Set the border width for when the widget is focused                                                         |
+| `setDisabledColor(self, color: QColor)`                 | Set the text color for when the widget is disabled                                                          |
+| `setDisabledBackgroundColor(self, color: QColor)`       | Set the background color for when the widget is disabled                                                    |
+| `setDisabledBorderColor(self, color: QColor)`           | Set the border color for when the widget is disabled                                                        |
+| `setDisabledBorderWidth(self, width: int)`              | Set the border width for when the widget is disabled                                                        |
 
 ## License
 
-License
+This software is licensed under the [MIT license](LICENSE).
