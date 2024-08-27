@@ -1,6 +1,10 @@
 # PyQt Animated LineEdit
 
-shields
+[![PyPI](https://img.shields.io/badge/pypi-v1.0.0-blue)](https://pypi.org/project/pyqt-animated-line-edit)
+[![Python](https://img.shields.io/badge/python-3.7+-blue)](https://github.com/marcohenning/pyqt-animated-line-edit)
+[![License](https://img.shields.io/badge/license-MIT-green)](https://github.com/marcohenning/pyqt-animated-line-edit/blob/master/LICENSE)
+[![Coverage](https://img.shields.io/badge/coverage-96%25-neon)](https://github.com/marcohenning/pyqt-animated-line-edit)
+[![Build](https://img.shields.io/badge/build-passing-neon)](https://github.com/marcohenning/pyqt-animated-line-edit)
 
 A modern and animated version of the QLineEdit widget for PyQt and PySide.
 
@@ -19,9 +23,8 @@ pip install pyqt-animated-line-edit
 ## Example
 
 ```python
-import sys
 from PyQt6.QtCore import QMargins
-from PyQt6.QtWidgets import QMainWindow, QApplication
+from PyQt6.QtWidgets import QMainWindow
 from pyqt_animated_line_edit import AnimatedLineEdit
 
 
@@ -36,14 +39,6 @@ class Window(QMainWindow):
         self.username.setPlaceholderFontSizeInner(10)
         self.username.setPlaceholderFontSizeOuter(8)
         self.username.setPadding(QMargins(12, 0, 12, 0))
-
-
-# Run the example
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    window = Window()
-    window.show()
-    app.exec()
 ```
 
 ## Documentation
@@ -83,4 +78,4 @@ if __name__ == '__main__':
 
 ## License
 
-This software is licensed under the [MIT license](LICENSE).
+This software is licensed under the [MIT license](https://github.com/marcohenning/pyqt-animated-line-edit/blob/master/LICENSE).
