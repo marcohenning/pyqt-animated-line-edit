@@ -38,6 +38,7 @@ def test_initial_values(qtbot):
     assert line_edit.getDisabledBorderColor() is None
     assert line_edit.getDisabledBorderWidth() is None
 
+
 def test_set_placeholder_text(qtbot):
     """Test setting the placeholder text"""
 
@@ -47,6 +48,7 @@ def test_set_placeholder_text(qtbot):
     line_edit.setPlaceholderText('Placeholder')
 
     assert line_edit.getPlaceholderText() == 'Placeholder'
+
 
 def test_set_color(qtbot):
     """Test setting the text color"""
@@ -59,6 +61,7 @@ def test_set_color(qtbot):
 
     assert line_edit.getColor() == color
 
+
 def test_set_placeholder_color(qtbot):
     """Test setting the placeholder color"""
 
@@ -69,6 +72,7 @@ def test_set_placeholder_color(qtbot):
     line_edit.setPlaceholderColor(color)
 
     assert line_edit.getPlaceholderColor() == color
+
 
 def test_set_placeholder_color_outside(qtbot):
     """Test setting the placeholder color for the outside position"""
@@ -81,6 +85,7 @@ def test_set_placeholder_color_outside(qtbot):
 
     assert line_edit.getPlaceholderColorOutside() == color
 
+
 def test_set_background_color(qtbot):
     """Test setting the background color"""
 
@@ -91,6 +96,7 @@ def test_set_background_color(qtbot):
     line_edit.setBackgroundColor(color)
 
     assert line_edit.getBackgroundColor() == color
+
 
 def test_set_border_color(qtbot):
     """Test setting the border color"""
@@ -103,6 +109,7 @@ def test_set_border_color(qtbot):
 
     assert line_edit.getBorderColor() == color
 
+
 def test_set_border_width(qtbot):
     """Test setting the border width"""
 
@@ -113,6 +120,7 @@ def test_set_border_width(qtbot):
 
     assert line_edit.getBorderWidth() == 10
 
+
 def test_set_border_radius(qtbot):
     """Test setting the border radius"""
 
@@ -122,6 +130,7 @@ def test_set_border_radius(qtbot):
     line_edit.setBorderRadius(10)
 
     assert line_edit.getBorderRadius() == 10
+
 
 def test_set_placeholder_font(qtbot):
     """Test getting the placeholder font for the inside position"""
@@ -152,6 +161,7 @@ def test_set_placeholder_font(qtbot):
     assert line_edit.getPlaceholderFontInner() == font_inner
     assert line_edit.getPlaceholderFontOuter() == font_outer
 
+
 def test_set_padding(qtbot):
     """Test setting the padding"""
 
@@ -163,6 +173,7 @@ def test_set_padding(qtbot):
 
     assert line_edit.getPadding() == padding
 
+
 def test_set_transition_duration(qtbot):
     """Test setting the transition duration"""
 
@@ -172,6 +183,7 @@ def test_set_transition_duration(qtbot):
     line_edit.setTransitionDuration(1000)
 
     assert line_edit.getTransitionDuration() == 1000
+
 
 def test_set_easing_curve(qtbot):
     """Test setting the easing curve"""
@@ -184,6 +196,7 @@ def test_set_easing_curve(qtbot):
 
     assert line_edit.getEasingCurve() == easing_curve
 
+
 def test_set_hovered_color(qtbot):
     """Test setting the hovered text color"""
 
@@ -194,6 +207,7 @@ def test_set_hovered_color(qtbot):
     line_edit.setHoveredColor(color)
 
     assert line_edit.getHoveredColor() == color
+
 
 def test_set_hovered_background_color(qtbot):
     """Test setting the hovered background color"""
@@ -206,6 +220,7 @@ def test_set_hovered_background_color(qtbot):
 
     assert line_edit.getHoveredBackgroundColor() == color
 
+
 def test_set_hovered_border_color(qtbot):
     """Test setting the hovered border color"""
 
@@ -217,6 +232,7 @@ def test_set_hovered_border_color(qtbot):
 
     assert line_edit.getHoveredBorderColor() == color
 
+
 def test_set_hovered_border_width(qtbot):
     """Test setting the hovered border width"""
 
@@ -226,6 +242,7 @@ def test_set_hovered_border_width(qtbot):
     line_edit.setHoveredBorderWidth(10)
 
     assert line_edit.getHoveredBorderWidth() == 10
+
 
 def test_set_focused_color(qtbot):
     """Test setting the focused text color"""
@@ -238,6 +255,7 @@ def test_set_focused_color(qtbot):
 
     assert line_edit.getFocusedColor() == color
 
+
 def test_set_focused_background_color(qtbot):
     """Test setting the focused background color"""
 
@@ -248,6 +266,7 @@ def test_set_focused_background_color(qtbot):
     line_edit.setFocusedBackgroundColor(color)
 
     assert line_edit.getFocusedBackgroundColor() == color
+
 
 def test_set_focused_border_color(qtbot):
     """Test setting the focused border color"""
@@ -260,6 +279,7 @@ def test_set_focused_border_color(qtbot):
 
     assert line_edit.getFocusedBorderColor() == color
 
+
 def test_set_focused_border_width(qtbot):
     """Test setting the focused border width"""
 
@@ -269,6 +289,7 @@ def test_set_focused_border_width(qtbot):
     line_edit.setFocusedBorderWidth(10)
 
     assert line_edit.getFocusedBorderWidth() == 10
+
 
 def test_set_disabled_color(qtbot):
     """Test setting the disabled text color"""
@@ -281,6 +302,7 @@ def test_set_disabled_color(qtbot):
 
     assert line_edit.getDisabledColor() == color
 
+
 def test_set_disabled_background_color(qtbot):
     """Test setting the disabled background color"""
 
@@ -291,6 +313,7 @@ def test_set_disabled_background_color(qtbot):
     line_edit.setDisabledBackgroundColor(color)
 
     assert line_edit.getDisabledBackgroundColor() == color
+
 
 def test_set_disabled_border_color(qtbot):
     """Test setting the disabled border color"""
@@ -303,6 +326,7 @@ def test_set_disabled_border_color(qtbot):
 
     assert line_edit.getDisabledBorderColor() == color
 
+
 def test_set_disabled_border_width(qtbot):
     """Test setting the disabled border width"""
 
@@ -312,6 +336,7 @@ def test_set_disabled_border_width(qtbot):
     line_edit.setDisabledBorderWidth(10)
 
     assert line_edit.getDisabledBorderWidth() == 10
+
 
 def test_focus_in_out(qtbot):
     """Test focusing the widget"""
