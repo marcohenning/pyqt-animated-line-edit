@@ -1,6 +1,6 @@
 # PyQt Animated LineEdit
 
-[![PyPI](https://img.shields.io/badge/pypi-v1.0.0-blue)](https://pypi.org/project/pyqt-animated-line-edit)
+[![PyPI](https://img.shields.io/badge/pypi-v1.0.1-blue)](https://pypi.org/project/pyqt-animated-line-edit)
 [![Python](https://img.shields.io/badge/python-3.7+-blue)](https://github.com/marcohenning/pyqt-animated-line-edit)
 [![License](https://img.shields.io/badge/license-MIT-green)](https://github.com/marcohenning/pyqt-animated-line-edit/blob/master/LICENSE)
 [![Coverage](https://img.shields.io/badge/coverage-96%25-neon)](https://github.com/marcohenning/pyqt-animated-line-edit)
@@ -34,16 +34,58 @@ class Window(QMainWindow):
         super().__init__(parent=None)
 
         # AnimatedLineEdit
-        self.username = AnimatedLineEdit('Username', self)
-        self.username.setBorderRadius(2)
-        self.username.setPlaceholderFontSizeInner(10)
-        self.username.setPlaceholderFontSizeOuter(8)
-        self.username.setPadding(QMargins(12, 0, 12, 0))
+        self.animated_line_edit = AnimatedLineEdit('Username', self)
+        self.animated_line_edit.setBorderRadius(2)
+        self.animated_line_edit.setPlaceholderFontSizeInner(10)
+        self.animated_line_edit.setPlaceholderFontSizeOuter(8)
+        self.animated_line_edit.setPadding(QMargins(12, 0, 12, 0))
 ```
 
 ## Documentation
 
 > **IMPORTANT:** <br>Styling of the widget must not be done by setting the stylesheet manually as the widget calculates the stylesheet itself and overrides it. Use the provided methods such as `setBackgroundColor()`, `setHoveredBackgroundColor()`, `setFocusedBackgroundColor()` and `setDisabledBackgroundColor()` instead.
+
+* **Setting the placeholder text:**
+```python
+animated_line_edit.setPlaceholderText('Username')
+```
+
+* **Setting the placeholder font family:**
+```python
+animated_line_edit.setPlaceholderFontFamily('Arial')
+```
+
+* **Setting the placeholder font size (inside position):**
+```python
+animated_line_edit.setPlaceholderFontSizeInner(14)
+```
+
+* **Setting the placeholder font size (outside position):**
+```python
+animated_line_edit.setPlaceholderFontSizeOuter(12)
+```
+
+* **Setting the placeholder color (affects both positions if no color is set for the outside position):**
+```python
+animated_line_edit.setPlaceholderColor(QColor(0, 0, 0))
+```
+
+* **Setting the placeholder color (outside position):**
+```python
+animated_line_edit.setPlaceholderColorOutside(QColor(0, 0, 0))
+```
+
+* **Setting the placeholder transition duration:**
+```python
+animated_line_edit.setTransitionDuration(500)
+```
+
+* **Setting the placeholder transition easing curve:**
+```python
+animated_line_edit.setEasingCurve(QEasingCurve.Type.Linear)
+```
+
+**<br>All methods:**
 
 | Method                                                  | Description                                                                                                 |
 |---------------------------------------------------------|-------------------------------------------------------------------------------------------------------------|

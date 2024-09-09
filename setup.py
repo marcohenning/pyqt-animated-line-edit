@@ -6,7 +6,7 @@ with open('README.md', 'r') as fh:
 
 setup(
     name='pyqt-animated-line-edit',
-    version='1.0.0',
+    version='1.0.1',
     author='Marco Henning',
     license='MIT',
     packages=find_namespace_packages(where="src"),

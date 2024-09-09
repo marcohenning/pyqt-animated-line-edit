@@ -352,6 +352,13 @@ class AnimatedLineEdit(QLineEdit):
 
         self.__placeholder_color = color
 
+        if self.hasFocus():
+            self.__placeholder_color_current = (self.__placeholder_color_outside if
+                                                self.__placeholder_color_outside is not None
+                                                else self.__placeholder_color)
+        else:
+            self.__placeholder_color_current = self.__placeholder_color
+
     def getPlaceholderColorOutside(self) -> QColor:
         """Get the current placeholder text color for the outside position.
         If this is not set the color for the inside position will be used
